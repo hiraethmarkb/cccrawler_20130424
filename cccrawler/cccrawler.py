@@ -1,4 +1,6 @@
 # import needed libs
+import sys
+sys.path[0:0] = './lib'
 import libtcodpy as libtcod
 
 # set some constants
@@ -15,7 +17,7 @@ def handle_keys():
     # Alt+Enter: toggle fullscreen
     libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
-  elif key.vk == libtcod.KEY_ESCAPE
+  elif key.vk == libtcod.KEY_ESCAPE:
     return True # exit game
 
   # movement keys
@@ -36,9 +38,9 @@ def handle_keys():
 ###########################################################
 
 # set font
-libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYP    E_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
+libtcod.console_set_custom_font('media/arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
 # initialize window
-libt.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'CC Crawler',     False)
+libt.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'CC Crawler', False)
 # we're going real-time, so limit game speed
 libtcod.sys_set_fps(LIMIT_FPS)
  
