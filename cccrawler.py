@@ -30,8 +30,8 @@ class Tile:
   def __init__(self, blocked, block_sight = None):
     self.blocked = blocked
 
-  # by default, if a tile is blocked, it also blocks sight
-  if block_sight is None: block_sight = blocked
+    # by default, if a tile is blocked, it also blocks sight
+    if block_sight is None: block_sight = blocked
     self.block_sight = block_sight
 
 
@@ -64,31 +64,33 @@ class Object:
 
 #
 def make_map():
-  global map
+  global ccmap
 
   # fill map with "unblocked" tiles
-  map = [[ Tile(False)
+  ccmap = [[ Tile(False)
     for y in range(MAP_HEIGHT) ]
       for x in range(MAP_WIDTH) ]
 
   #place two pillars to test the map
-  map[30][22].blocked = True
-  map[30][22].block_sight = True
-  map[50][22].blocked = True
-  map[50][22].block_sight = True
+  ccmap[30][22].blocked = True
+  ccmap[30][22].block_sight = True
+  ccmap[50][22].blocked = True
+  ccmap[50][22].block_sight = True
 
 #
 def render_all():
   global color_light_wall
   global color_light_ground
+  #global ccmap
  
   #go through all tiles, and set their background color
-  for y in range (MAP_HEIGHT):
-    wall = map[x][y].block_sight
-    if wall:
-      libtcod.console_set_char_background(con, x, y, color_dark_wall, libtcod.BKGND_SET)
-    else:
-      libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET)
+  for y in range(MAP_HEIGHT):
+    for x in range(MAP_WIDTH):
+      wall = ccmap[x][y].block_sight
+      if wall:
+        libtcod.console_set_char_background(con, x, y, color_dark_wall, libtcod.BKGND_SET)
+      else:
+        libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET)
 
   # draw all objects in the list
   for object in objects:
@@ -146,6 +148,9 @@ npc = Object(SCREEN_WIDTH/2 - 5, SCREEN_HEIGHT/2, '@', libtcod.yellow)
  
 #the list of objects with those two
 objects = [npc, player]
+
+#generate map (at this point it's not drawn to the screen)
+make_map()
 
 # main game loop, runs until the window is closed
 while not libtcod.console_is_window_closed():
