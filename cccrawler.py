@@ -45,9 +45,11 @@ class Object:
     self.color = color
  
   def move(self, dx, dy):
-    #move by the given amount
-    self.x += dx
-    self.y += dy
+    #check we're not trying to walk into something, like a pillar
+    if not ccmap[self.x + dx][self.y + dy].blocked:
+      #move by the given amount
+      self.x += dx
+      self.y += dy
  
   def draw(self):
     #set the color and then draw the character that represents this object at its position
@@ -81,16 +83,17 @@ def make_map():
 def render_all():
   global color_light_wall
   global color_light_ground
-  #global ccmap
  
   #go through all tiles, and set their background color
   for y in range(MAP_HEIGHT):
     for x in range(MAP_WIDTH):
       wall = ccmap[x][y].block_sight
       if wall:
-        libtcod.console_set_char_background(con, x, y, color_dark_wall, libtcod.BKGND_SET)
+        #libtcod.console_set_char_background(con, x, y, color_dark_wall, libtcod.BKGND_SET)
+        libtcod.console_put_char_ex(con, x, y, '#', libtcod.white, color_dark_wall)
       else:
-        libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET)
+        #libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET)
+        libtcod.console_put_char_ex(con, x, y, '.', libtcod.white, color_dark_ground)
 
   # draw all objects in the list
   for object in objects:
