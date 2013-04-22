@@ -3,10 +3,37 @@
 import os
 import libtcodpy as libtcod
 
-# set some constants
+###########################################################
+# Constant definitions
+###########################################################
+
+# screen size
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
+
+# map size
+MAP_WIDTH = 80
+MAP_HEIGHT = 45
+
+# 
 LIMIT_FPS = 20
+
+color_dark_wall = libtcod.Color(0, 0, 100)
+color_dark_ground = libtcod.Color(50, 50, 150)
+
+###########################################################
+# Class definitions
+###########################################################
+
+class Tile:
+  # a tile of the map and it's properties
+  def __init__(self, blocked, block_sight = None):
+    self.blocked = blocked
+
+  # by default, if a tile is blocked, it also blocks sight
+  if block_sight is None: block_sight = blocked
+    self.block_sight = block_sight
+
 
 class Object:
   #this is a generic object: the player, a monster, an item, the stairs...
@@ -30,6 +57,46 @@ class Object:
   def clear(self):
     #erase the character that represents this object
     libtcod.console_put_char(con, self.x, self.y, ' ', libtcod.BKGND_NONE)
+
+###########################################################
+# Function definitions
+###########################################################
+
+#
+def make_map():
+  global map
+
+  # fill map with "unblocked" tiles
+  map = [[ Tile(False)
+    for y in range(MAP_HEIGHT) ]
+      for x in range(MAP_WIDTH) ]
+
+  #place two pillars to test the map
+  map[30][22].blocked = True
+  map[30][22].block_sight = True
+  map[50][22].blocked = True
+  map[50][22].block_sight = True
+
+#
+def render_all():
+  global color_light_wall
+  global color_light_ground
+ 
+  #go through all tiles, and set their background color
+  for y in range (MAP_HEIGHT):
+    wall = map[x][y].block_sight
+    if wall:
+      libtcod.console_set_char_background(con, x, y, color_dark_wall, libtcod.BKGND_SET)
+    else:
+      libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET)
+
+  # draw all objects in the list
+  for object in objects:
+    object.draw()
+
+  #blit the contents of "con" to the root console
+  libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
+
 
 # check for pressed keys, and update player position
 def handle_keys():
@@ -83,12 +150,9 @@ objects = [npc, player]
 # main game loop, runs until the window is closed
 while not libtcod.console_is_window_closed():
   
-  #draw all objects in the list
-  for object in objects:
-    object.draw()
-
-  #blit the contents of "con" to the root console and present it
-  libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
+  #render the screen
+  render_all()
+  
   libtcod.console_flush()
  
   #erase all objects at their old locations, before they move
