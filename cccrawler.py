@@ -42,6 +42,9 @@ class Tile:
   def __init__(self, blocked, block_sight = None):
     self.blocked = blocked
 
+    # all tiles start unexplored
+    self.explored = False
+
     # by default, if a tile is blocked, it also blocks sight
     if block_sight is None: block_sight = blocked
     self.block_sight = block_sight
@@ -218,13 +221,15 @@ def render_all():
         visible = libtcod.map_is_in_fov(fov_map, x, y)
         wall = ccmap[x][y].block_sight
         if not visible:
-          # it's out of the player's FOV
-          if wall:
-            #libtcod.console_set_char_background(con, x, y, color_dark_wall, libtcod.BKGND_SET)
-            libtcod.console_put_char_ex(con, x, y, '#', libtcod.white, color_dark_wall)
-          else:
-            #libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET)
-            libtcod.console_put_char_ex(con, x, y, '.', libtcod.white, color_dark_ground)
+          # if it's not visible right now, the player can only see it if it's explored
+          if ccmap[x][y].explored:
+            # it's out of the player's FOV
+            if wall:
+              #libtcod.console_set_char_background(con, x, y, color_dark_wall, libtcod.BKGND_SET)
+              libtcod.console_put_char_ex(con, x, y, '#', libtcod.white, color_dark_wall)
+            else:
+              #libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET)
+              libtcod.console_put_char_ex(con, x, y, '.', libtcod.white, color_dark_ground)
 
         else:
           # it's visible
@@ -234,7 +239,8 @@ def render_all():
           else:
             #libtcod.console_set_char_background(con, x, y, color_dark_ground, libtcod.BKGND_SET)
             libtcod.console_put_char_ex(con, x, y, '.', libtcod.white, color_light_ground)
-
+          # since it's visible, explore it
+          ccmap[x][y].explored = True
 
   # draw all objects in the list
   for object in objects:
