@@ -159,6 +159,11 @@ def make_map():
       # centre coordinates of new room, will be useful later
       (new_x, new_y) = new_room.center()
 
+      #optional: print "room number" to see how the map drawing worked
+      #          we may have more than ten rooms, so print 'A' for the first room, 'B' for the next...
+      room_no = Object(new_x, new_y, chr(65+num_rooms), libtcod.white)
+      objects.insert(0, room_no) #draw early, so monsters are drawn on top
+
       if num_rooms == 0:
         # this is the first room, where the player starts at
         player.x = new_x
