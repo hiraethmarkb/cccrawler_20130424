@@ -35,6 +35,15 @@ class Tile:
     self.block_sight = block_sight
 
 
+class Rect:
+  # a rectangle on the map. used to characterize a room.
+  def __init__(self, x, y, w, h):
+    self.x1 = x
+    self.y1 = y
+    self.x2 = x + w
+    self.y2 = y + h
+
+
 class Object:
   #this is a generic object: the player, a monster, an item, the stairs...
   #it's always represented by a character on screen.
@@ -65,19 +74,58 @@ class Object:
 ###########################################################
 
 #
+def create_room(room):
+  global ccmap
+  
+  # go through the tiles in the rectangle and make them passable
+  for x in range(room.x1 + 1, room.x2):
+    for y in range(room.y1 + 1, room.y2):
+      ccmap[x][y].blocked = False
+      ccmap[x][y].block_sight = False
+
+
+#
+def create_h_tunnel(x1, x2, y):
+  global ccmap
+  
+  # horizontal tunnel. min() and max() are used in case x1>x2
+  for x in range(min(x1, x2), max(x1, x2) + 1):
+    ccmap[x][y].blocked = False
+    ccmap[x][y].block_sight = False
+
+
+#
+def create_v_tunnel(y1, y2, x):
+  global ccmap
+  
+  # vertical tunnel
+  for y in range(min(y1, y2), max(y1, y2) + 1):
+    ccmap[x][y].blocked = False
+    ccmap[x][y].block_sight = False
+
+
+#
 def make_map():
   global ccmap
 
-  # fill map with "unblocked" tiles
-  ccmap = [[ Tile(False)
+  # fill map with "blocked" tiles
+  ccmap = [[ Tile(True)
     for y in range(MAP_HEIGHT) ]
       for x in range(MAP_WIDTH) ]
 
-  #place two pillars to test the map
-  ccmap[30][22].blocked = True
-  ccmap[30][22].block_sight = True
-  ccmap[50][22].blocked = True
-  ccmap[50][22].block_sight = True
+  #create two rooms
+  room1 = Rect(20, 15, 10, 15)
+  room2 = Rect(50, 15, 10, 15)
+  create_room(room1)
+  create_room(room2)
+
+  # create a tunnel to join the two rooms
+  create_h_tunnel(25, 55, 23)
+  
+  # place in center of first room
+  player.x = 25
+  player.y = 23
+
 
 #
 def render_all():
