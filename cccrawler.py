@@ -308,6 +308,7 @@ make_map()
 
 # create the FOV map, according to the generated map
 fov_map = libtcod.map_new(MAP_WIDTH, MAP_HEIGHT)
+
 for y in range(MAP_HEIGHT):
     for x in range(MAP_WIDTH):
         libtcod.map_set_properties(fov_map, x, y, not ccmap[x][y].block_sight, not ccmap[x][y].blocked)
