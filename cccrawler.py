@@ -20,6 +20,9 @@ ROOM_MAX_SIZE = 10
 ROOM_MIN_SIZE = 6
 MAX_ROOMS = 30
 
+# maximum number of monsters per room
+MAX_ROOM_MONSTERS = 3
+
 # fov values
 FOV_ALGO = 0 # default FOV algorithm
 FOV_LIGHT_WALLS = True
@@ -101,6 +104,25 @@ class Object:
 ###########################################################
 
 #
+def place_objects(room):
+  # choose random number of monsters
+  num_monsters = libtcod.random_get_int(0, 0, MAX_ROOM_MONSTERS)
+
+  for i in range(num_monsters):
+    # choose random spot for this monster
+    x = libtcod.random_get_int(0, room.x1, room.x2)
+    y = libtcod.random_get_int(0, room,y1, room,y2)
+
+    if libtcod.random_get_int(0, 0, 100) < 80 # 80% chance of getting an orc
+      # create an orc
+      monster = Object(x, y, 'o', libtcod.desaturated_green)
+    else:
+      # create a troll
+      monster = Object(x, y, 'T', libtcod.darker_green)
+
+    objects.append(monster)
+
+#
 def create_room(room):
   global ccmap
   
@@ -167,6 +189,9 @@ def make_map():
 
       # "paint" it to the map's tiles
       create_room(new_room)
+
+      # add some contents to this room, such as monsters
+      place_objects(new_room)
 
       # centre coordinates of new room, will be useful later
       (new_x, new_y) = new_room.center()
@@ -297,11 +322,8 @@ libtcod.sys_set_fps(LIMIT_FPS)
 #create object representing the player
 player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', libtcod.white)
  
-#create an NPC
-npc = Object(SCREEN_WIDTH/2 - 5, SCREEN_HEIGHT/2, '@', libtcod.yellow)
- 
 #the list of objects with those two
-objects = [npc, player]
+objects = [player]
 
 #generate map (at this point it's not drawn to the screen)
 make_map()
@@ -310,8 +332,8 @@ make_map()
 fov_map = libtcod.map_new(MAP_WIDTH, MAP_HEIGHT)
 
 for y in range(MAP_HEIGHT):
-    for x in range(MAP_WIDTH):
-        libtcod.map_set_properties(fov_map, x, y, not ccmap[x][y].block_sight, not ccmap[x][y].blocked)
+  for x in range(MAP_WIDTH):
+    libtcod.map_set_properties(fov_map, x, y, not ccmap[x][y].block_sight, not ccmap[x][y].blocked)
 
 # only need to recompute if the player moves, or a tile changes
 fov_recompute = True
