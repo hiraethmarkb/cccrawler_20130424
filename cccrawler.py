@@ -75,15 +75,17 @@ class Rect:
 class Object:
   #this is a generic object: the player, a monster, an item, the stairs...
   #it's always represented by a character on screen.
-  def __init__(self, x, y, char, color):
+  def __init__(self, x, y, char, name, color, blocks=False):
     self.x = x
     self.y = y
     self.char = char
+    self.name = name
     self.color = color
+    self.blocks = blocks
  
   def move(self, dx, dy):
     #check we're not trying to walk into something, like a pillar
-    if not ccmap[self.x + dx][self.y + dy].blocked:
+    if not is_blocked(self.x + dx, self.y + dy):
       #move by the given amount
       self.x += dx
       self.y += dy
@@ -104,6 +106,19 @@ class Object:
 ###########################################################
 
 #
+def is_blocked(x, y):
+  # first test the map tile
+  if ccmap[x][y].blocked:
+    return True
+
+  # now check for any blocking objects
+  for object in objects:
+    if object.blocks and object.x == x and object.y == y:
+      return True
+
+  return False
+
+#
 def place_objects(room):
   # choose random number of monsters
   num_monsters = libtcod.random_get_int(0, 0, MAX_ROOM_MONSTERS)
@@ -111,16 +126,19 @@ def place_objects(room):
   for i in range(num_monsters):
     # choose random spot for this monster
     x = libtcod.random_get_int(0, room.x1, room.x2)
-    y = libtcod.random_get_int(0, room,y1, room,y2)
+    y = libtcod.random_get_int(0, room.y1, room.y2)
 
-    if libtcod.random_get_int(0, 0, 100) < 80 # 80% chance of getting an orc
+    # only place it if the tile is not blocked
+    if not is_blocked(x, y):
+
+      if libtcod.random_get_int(0, 0, 100) < 80: # 80% chance of getting an orc
       # create an orc
-      monster = Object(x, y, 'o', libtcod.desaturated_green)
-    else:
-      # create a troll
-      monster = Object(x, y, 'T', libtcod.darker_green)
+        monster = Object(x, y, 'o', 'orc', libtcod.desaturated_green, blocks=True)
+      else:
+        # create a troll
+        monster = Object(x, y, 'T', 'troll', libtcod.darker_green, blocks=True)
 
-    objects.append(monster)
+      objects.append(monster)
 
 #
 def create_room(room):
@@ -198,7 +216,7 @@ def make_map():
 
       #optional: print "room number" to see how the map drawing worked
       #          we may have more than ten rooms, so print 'A' for the first room, 'B' for the next...
-      room_no = Object(new_x, new_y, chr(65+num_rooms), libtcod.white)
+      room_no = Object(new_x, new_y, chr(65+num_rooms), 'room number', libtcod.white)
       objects.insert(0, room_no) #draw early, so monsters are drawn on top
 
       if num_rooms == 0:
@@ -320,7 +338,7 @@ con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
 libtcod.sys_set_fps(LIMIT_FPS)
  
 #create object representing the player
-player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', libtcod.white)
+player = Object(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, '@', 'Player', libtcod.white, blocks=True)
  
 #the list of objects with those two
 objects = [player]
@@ -337,6 +355,10 @@ for y in range(MAP_HEIGHT):
 
 # only need to recompute if the player moves, or a tile changes
 fov_recompute = True
+
+# game state and last action
+game_state = 'playing'
+player_action = None
 
 # main game loop, runs until the window is closed
 while not libtcod.console_is_window_closed():
